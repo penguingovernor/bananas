@@ -2,11 +2,15 @@ package bananas
 
 import (
 	"fmt"
+	"net/http"
 	"net/url"
 	"time"
+
+	"github.com/PuerkitoBio/goquery"
 )
 
 const baseNutritionMenuLink = "https://nutrition.sa.ucsc.edu/longmenu.aspx"
+const baseNutritionLink = "https://nutrition.sa.ucsc.edu"
 
 func generateURL(dh DiningHall, ml Meal, date time.Time) (string, error) {
 	// Make a URL.
@@ -39,4 +43,57 @@ func generateURL(dh DiningHall, ml Meal, date time.Time) (string, error) {
 	baseMenuURL.RawQuery = parameters.Encode()
 
 	return baseMenuURL.String(), nil
+}
+
+func generateRequest(menuURL string) (*http.Request, error) {
+	// Grab the cookies necessary for the request.
+	responseWithCookies, err := http.Get(baseNutritionLink)
+	if err != nil {
+		return nil, fmt.Errorf("failed to get necessary cookies: %v", err)
+	}
+	// Make a request...
+	req, err := http.NewRequest(http.MethodGet, menuURL, nil)
+	if err != nil {
+		return nil, fmt.Errorf("failed to make request: %v", err)
+	}
+	// and add the cookies to it.
+	for _, ck := range responseWithCookies.Cookies() {
+		req.AddCookie(ck)
+	}
+	return req, nil
+}
+
+func menuFromRequest(req *http.Request) ([]string, error) {
+	// Do the request.
+	resp, err := http.DefaultClient.Do(req)
+	if err != nil {
+		return nil, fmt.Errorf("unable to get menu: %v", err)
+	}
+	document, err := goquery.NewDocumentFromResponse(resp)
+	if err != nil {
+		return nil, fmt.Errorf("unable to parse response: %v", err)
+	}
+	tMenuItems := []string{}
+	document.Find(".longmenucoldispname a").Each(func(index int, selection *goquery.Selection) {
+		tMenuItems = append(tMenuItems, selection.Text())
+	})
+	return tMenuItems, nil
+}
+
+// MenuFor returns a slice of menu items given
+// a dining hall, a meal, and a date.
+func MenuFor(dh DiningHall, ml Meal, date time.Time) ([]string, error) {
+	// Generate the URL
+	menuURL, err := generateURL(dh, ml, date)
+	if err != nil {
+		return nil, err
+	}
+	// Generate the request.
+	req, err := generateRequest(menuURL)
+	if err != nil {
+		return nil, err
+	}
+
+	// Return a menu from that request.
+	return menuFromRequest(req)
 }
