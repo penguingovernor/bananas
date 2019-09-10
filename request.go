@@ -69,13 +69,18 @@ func menuFromRequest(req *http.Request) ([]string, error) {
 	if err != nil {
 		return nil, fmt.Errorf("unable to get menu: %v", err)
 	}
+	// Parse the request
 	document, err := goquery.NewDocumentFromResponse(resp)
 	if err != nil {
 		return nil, fmt.Errorf("unable to parse response: %v", err)
 	}
-	tMenuItems := []string{}
-	document.Find(".longmenucoldispname a").Each(func(index int, selection *goquery.Selection) {
-		tMenuItems = append(tMenuItems, selection.Text())
+	// Find all a tags that have a parent with a class name of longmenucoldispname.
+	menuSelections := document.Find(".longmenucoldispname a")
+	// Make a slice that has a length equal to the number of a tags we found.
+	// And add all the a tags text to that slice.
+	tMenuItems := make([]string, menuSelections.Length())
+	menuSelections.Each(func(index int, selection *goquery.Selection) {
+		tMenuItems[index] = selection.Text()
 	})
 	return tMenuItems, nil
 }
