@@ -10,9 +10,9 @@ Each dining hall has it's own menu that can be viewed online here: https://nutri
 Many students have built third party menu viewers -- each with their own method of parsing the website
 (manual web scraping is necessary as there is no public API).
 And this is where bananas comes in.
-Bananas will serve as the engine for a new API server that is in development, so that students to use to build custom web views, apps etc. .
+Bananas will serve as the engine for a new API server that is in development, so that students can build custom web views, apps etc. .
 
-Bananas will also be available for anyone else to use so that they too can build awesome stuff with it.
+Bananas will also be available for everyone, so that they too can build awesome stuff with it.
 
 Usage
 
