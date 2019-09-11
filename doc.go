@@ -42,11 +42,20 @@ Examples
 
 Here are some common uses for bananas.
 
-	// Get the lunch menu for today's meal at RCC and Oakes Dining Hall
-	banana.MenuFrom(bananas.CarsonOakes, bananas.Lunch, time.Now())
+	// Get the lunch menu for today's meal at RCC and Oakes Dining Hall.
+	banana.MenuFor(bananas.CarsonOakes, bananas.Lunch, time.Now())
 
-	// For tomorrow's dinner menu at College 9 & 10
-	banana.MenuFrom(bananas.NineTen, bananas.Dinner, time.Now().Add(24 * time.Hour))
+	// For tomorrow's dinner menu at College 9 & 10.
+	banana.MenuFor(bananas.NineTen, bananas.Dinner, time.Now().Add(24 * time.Hour))
 
+Note that each of these calls will make two (2) http requests.
+One for the menu data, and another to set the cookies.
+
+If you would like to only have one http request per call use bananas.Client
+
+	// Make a client.
+	c := bananas.Client{}
+	// Get the menu as normal.
+	c.MenuFor(bananas.CarsonOakes, bananas.Lunch, time.Now())
 */
 package bananas
